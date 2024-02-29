@@ -1,0 +1,119 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                              Trends and News.mq5 |
+//|                        Copyright 2021, Forex Robot Easy Team     |
+//|                                              forexroboteasy.com |
+//+------------------------------------------------------------------+
+#property copyright 'Copyright 2021, Forex Robot Easy Team'
+#property link      'forexroboteasy.com'
+#property version   '1.00'
+
+//+------------------------------------------------------------------+
+//| Global variables                                                  |
+//+------------------------------------------------------------------+
+datetime newsTime[10];
+string newsEvent[10];
+string newsImpact[10];
+
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Initialize news data
+   newsTime[0] = StrToTime('2021.01.01 08:00');
+   newsEvent[0] = 'Non-Farm Payrolls';
+   newsImpact[0] = 'High';
+
+   newsTime[1] = StrToTime('2021.01.15 14:30');
+   newsEvent[1] = 'Retail Sales';
+   newsImpact[1] = 'Medium';
+
+   // Add vertical lines to chart for news events
+   for (int i = 0; i < ArraySize(newsTime); i++)
+   {
+      ObjectCreate('NewsLine' + IntegerToString(i), OBJ_VLINE, 0, newsTime[i], 0);
+      ObjectSetInteger(0, 'NewsLine' + IntegerToString(i), OBJPROP_COLOR, clrRed);
+      ObjectSetInteger(0, 'NewsLine' + IntegerToString(i), OBJPROP_STYLE, STYLE_DOT);
+   }
+
+   return(INIT_SUCCEEDED);
+}
+
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime& time[],
+                const double& open[],
+                const double& high[],
+                const double& low[],
+                const double& close[],
+                const long& tick_volume[],
+                const long& volume[],
+                const int& spread[])
+{
+   // Perform trend analysis
+   double trendM5 = CalculateTrend('M5');
+   double trendM15 = CalculateTrend('M15');
+   double trendH1 = CalculateTrend('H1');
+   double trendH4 = CalculateTrend('H4');
+   double trendD1 = CalculateTrend('D1');
+
+   // Determine safer direction to open positions
+   int buyCount = 0;
+   int sellCount = 0;
+
+   if (trendM5 > 0) buyCount++;
+   else if (trendM5 < 0) sellCount++;
+
+   if (trendM15 > 0) buyCount++;
+   else if (trendM15 < 0) sellCount++;
+
+   if (trendH1 > 0) buyCount++;
+   else if (trendH1 < 0) sellCount++;
+
+   if (trendH4 > 0) buyCount++;
+   else if (trendH4 < 0) sellCount++;
+
+   if (trendD1 > 0) buyCount++;
+   else if (trendD1 < 0) sellCount++;
+
+   string saferDirection;
+   if (buyCount > sellCount) saferDirection = 'Buy';
+   else if (sellCount > buyCount) saferDirection = 'Sell';
+   else saferDirection = 'No clear direction';
+
+   // Display trend and news information
+   Comment('Trend Analysis:');
+   Comment('M5: ' + DoubleToString(trendM5, 2));
+   Comment('M15: ' + DoubleToString(trendM15, 2));
+   Comment('H1: ' + DoubleToString(trendH1, 2));
+   Comment('H4: ' + DoubleToString(trendH4, 2));
+   Comment('D1: ' + DoubleToString(trendD1, 2));
+   Comment('Safer Direction: ' + saferDirection);
+
+   Comment('News Events:');
+   for (int i = 0; i < ArraySize(newsTime); i++)
+   {
+      Comment(TimeToString(newsTime[i], TIME_DATE|TIME_MINUTES) + ' - ' + newsEvent[i] + ' (' + newsImpact[i] + ')');
+   }
+
+   return(rates_total);
+}
+
+//+------------------------------------------------------------------+
+//| Calculate trend for a specific timeframe                         |
+//+------------------------------------------------------------------+
+double CalculateTrend(const string timeframe)
+{
+   // Perform trend calculation
+   double trend = 0;
+
+   // Add your trend calculation logic here
+   // ...
+   // ...
+
+   return(trend);
+}
